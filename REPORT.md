@@ -8,112 +8,135 @@ Autor: Mateusz Kowalski 280543
 
 ---
 
-### Wprowadzenie do zbioru Heart Disease
+### Implementacja
 
-W ćwiczeniu wykorzystałem zbiór danych Heart Disease udostępniony w repozytorium UCI Machine Learning Repository. Zbiór zawiera informacje o pacjentach, obejmujące cechy demograficzne oraz wyniki wybranych badań medycznych.
+```python
+class Linear:
+    def __init__(
+        self,
+        in_features: int,
+        out_features: int,
+        init_method: str = "he",
+        random_state: int = 42,
+    ):
+        rng = np.random.default_rng(random_state)
 
-Zbiór zawiera 303 obserwacje oraz 13 cech wejściowych. Pierwotna zmienna docelowa num przyjmuje wartości od 0 do 4, gdzie wartość 0 oznacza brak rozpoznanej choroby serca, a wartości większe od 0 wskazują na jej obecność.
+        if init_method == "he":
+            scale = np.sqrt(2.0 / in_features)
+        elif init_method == "normal_001":
+            scale = 0.01
+        elif init_method == "std_1":
+            scale = 1.0
+        elif init_method == "broken_large":
+            scale = 5.0
+        else:
+            raise ValueError(f"Nieznana metoda inicjalizacji: {init_method}")
 
-| Nazwa cechy | Opis | Typ w analizie |
-| ----- | ----- | ----- |
-| `age` | Wiek pacjenta w latach | Numeryczna |
-| `sex` | Płeć pacjenta (0 lub 1\) | Kategoryczna |
-| `cp` | Rodzaj bólu w klatce piersiowej | Kategoryczna |
-| `trestbps` | Ciśnienie krwi w spoczynku (mm Hg) | Numeryczna |
-| `chol` | Poziom cholesterolu w surowicy (mg/dl) | Numeryczna |
-| `fbs` | Informacja, czy glikemia na czczo przekracza 120 mg/dl | Kategoryczna |
-| `restecg` | Wynik elektrokardiogramu w spoczynku | Kategoryczna |
-| `thalach` | Maksymalna osiągnięta częstość akcji serca | Numeryczna |
-| `exang` | Występowanie dławicy piersiowej wywołanej wysiłkiem | Kategoryczna |
-| `oldpeak` | Obniżenie odcinka ST wywołane wysiłkiem względem spoczynku | Numeryczna |
-| `slope` | Nachylenie szczytowego odcinka ST podczas wysiłku | Kategoryczna |
-| `ca` | Liczba głównych naczyń uwidocznionych w badaniu fluoroskopowym | Numeryczna |
-| `thal` | Wynik badania dotyczącego talasemii, zakodowany kategoriami diagnostycznymi | Kategoryczna |
-| `num` | Pierwotna zmienna docelowa określająca wynik diagnostyczny | Docelowa |
+        self.W = rng.normal(loc=0.0, scale=scale, size=(in_features, out_features))
+        self.b = np.zeros((1, out_features))
 
-### Przygotowanie danych do uczenia
+        self.cache_x: np.ndarray | None = None
+        self.dW: np.ndarray | None = None
+        self.db: np.ndarray | None = None
 
-Następnym krokiem było przygotowanie danych do klasyfikacji. W tym celu użyłem pakietu scikit-learn. Cechy numeryczne standaryzowałem do porównywalnej skali przy użyciu StandardScalera, natomiast dla cech kategorycznych użyłem OneHotEncodera.
+        self.m_W = np.zeros_like(self.W)
+        self.v_W = np.zeros_like(self.W)
+        self.m_b = np.zeros_like(self.b)
+        self.v_b = np.zeros_like(self.b)
+        self.t = 0
 
-Zbiór podzieliłem na 80% danych treningowych i 20% danych testowych. Na tym etapie wykorzystałem stratyfikację, aby osiągnąć porównywalne proporcje klas w obu podzbiorach.
+    def forward(self, x: np.ndarray) -> np.ndarray:
+        self.cache_x = x
+        return np.dot(x, self.W) + self.b
 
-### Baseline klasyfikatora
+    def backward(self, grad_output: np.ndarray) -> np.ndarray:
+        self.dW = np.dot(self.cache_x.T, grad_output)
+        self.db = np.sum(grad_output, axis=0, keepdims=True)
+        grad_input = np.dot(grad_output, self.W.T)
+        return grad_input
 
-Jako klasyfikator bazowy zastosowałem regresję logistyczną z biblioteki scikit-learn. Model wytrenowałem na przygotowanym zbiorze treningowym, a jego skuteczność oceniłem na zbiorze testowym.
+    def update(
+        self,
+        alpha: float,
+        optimizer: str = "sgd",
+        beta1: float = 0.9,
+        beta2: float = 0.999,
+        eps: float = 1e-8,
+    ):
+        if optimizer == "sgd":
+            self.W -= alpha * self.dW
+            self.b -= alpha * self.db
 
-| Metryka | Wynik |
-| ----- | ----- |
-| Accuracy | 0.869 |
-| F1-score dla klasy 1 | 0,867 |
+        elif optimizer == "adam":
+            self.t += 1
 
-| Klasa rzeczywista / przewidywana | 0 | 1 |
-| ----- | ----- | ----- |
-| 0 | 27 | 6 |
-| 1 | 2 | 26 |
+            self.m_W = beta1 * self.m_W + (1.0 - beta1) * self.dW
+            self.v_W = beta2 * self.v_W + (1.0 - beta2) * (self.dW**2)
 
-Model poprawnie sklasyfikował 53 z 61 obserwacji testowych.
+            m_W_corrected = self.m_W / (1.0 - beta1**self.t)
+            v_W_corrected = self.v_W / (1.0 - beta2**self.t)
 
-### Implementacja modelu regresji logistycznej
+            self.W -= alpha * m_W_corrected / (np.sqrt(v_W_corrected) + eps)
 
-Zaimplementowałem własny model regresji logistycznej od zera w bibliotece NumPy. Wykorzystałem:
+            self.m_b = beta1 * self.m_b + (1.0 - beta1) * self.db
+            self.v_b = beta2 * self.v_b + (1.0 - beta2) * (self.db**2)
 
-- **Funkcję aktywacji:** Sigmoida sigma(z) = 1 / (1 + e^(-z)).
-- **Funkcję kosztu:** Entropię krzyżową (Binary Cross-Entropy): L = -y * ln p(x) - (1-y) * ln(1-p(x)).
-- **Optymalizator:** Gradient prosty (Batch Gradient Descent) z regułą aktualizacji wag opisanej w poleceniu
+            m_b_corrected = self.m_b / (1.0 - beta1**self.t)
+            v_b_corrected = self.v_b / (1.0 - beta2**self.t)
 
-Podczas finalizacji rozwiązania pokazałem własną implementację LLM'owi i ten mnie uświadomił, że mozliwa jest optymalizacja, polegająca na wykorzystaniu zachowania biblioteki numpy dotyczącej mnożenia macierzy, wektorów i skalarów. Wobec tego zamiast iterować po każdym pacjencie z osobna w kodzie została utworzona macierz pacjentów, która jest mnożona przez wektor wag zwracając tym samym wektor prawdopodobieństw.
+            self.b -= alpha * m_b_corrected / (np.sqrt(v_b_corrected) + eps)
+```
 
-### Metryki jakości modelu
+```python
+class ReLU:
+    def __init__(self):
+        self.cache_x: np.ndarray | None = None
 
-Przeprowadziłem trzy serie eksperymentów badawczych w celu zbadania wpływu hiperparametrów na zbieżność i jakość klasyfikacji.
+    def forward(self, x: np.ndarray) -> np.ndarray:
+        self.cache_x = x
+        return np.maximum(0, x)
 
-![Learning curve alpha F1](plots/learning_curve_alpha_f1.png)
-![Learning curve alpha loss](plots/learning_curve_alpha_loss.png)
+    def backward(self, grad_output: np.ndarray) -> np.ndarray:
+        return grad_output * (self.cache_x > 0)
+```
 
-#### 1. Wpływ współczynnika uczenia (alpha)
-Badanie przeprowadzono dla liczby epok = 1000 przy inicjalizacji zerami:
+### Wyniki eksperymentów
 
-- alpha = 0.50 | Final Loss: 0.3349 | Test F1: 0.847
-- alpha = 0.10 | Final Loss: 0.3368 | Test F1: 0.867
-- alpha = 0.01 | Final Loss: 0.3739 | Test F1: 0.881
-- alpha = 0.001 | Final Loss: 0.5369 | Test F1: 0.857
-- alpha = 0.0001 | Final Loss: 0.6688 | Test F1: 0.857
+#### Wpływ wymiarowości warstwy ukrytej
 
-![Learning curve init loss](plots/learning_curve_init_loss.png)
+![part1_layers_loss](plots/part1_layers_loss.png)
 
-#### 2. Wpływ rozkładu inicjalizacji parametrów
-Dla alpha = 0.1 i 1000 epok:
+Im większa wyiarowość warstwy ukryte, tym model radzi sobie lepiej.
 
-- **Zeros:** Final Loss: 0.3368 | Test F1: 0.867
-- **Normal (std=0.01):** Final Loss: 0.3368 | Test F1: 0.867
-- **Uniform (-0.01, 0.01):** Final Loss: 0.3368 | Test F1: 0.867
-- **Large Normal (std=1.0):** Final Loss: 0.3374 | Test F1: 0.862
+#### Wpływ normalizacji danych
 
-#### 3. Ostateczne wyniki najlepszego modelu
-Najlepszy model osiągnięto przy konfiguracji: alpha = 0.1, inicjalizacja zerami, liczba epok = 2000.
+![part1_normalization_loss](plots/part1_normalization_loss.png)
 
-- **Accuracy:** 0.869
-- **Precision:** 0.812
-- **Recall:** 0.929
-- **F1-score:** 0.867
+Model ma lepsze wyniki na danych znormalizowanych po większej ilości epok.
 
-### Wnioski
+#### Wpływ głębokości sieci (liczba warstw ukrytych)
 
-1. **Czy klasyfikator liniowy zawsze zbiega do pożądanego przez nas globalnego minimum?**
+![part1_hidden_size_loss](plots/part1_hidden_size_loss.png)
 
-Tak, pod warunkiem, że współczynnik alpha jest większa od zera. Wynika to z matematycznych właściwości wykorzystanych funkcji.
+Zwiększenie liczby warst ukrytych wpływa pozytwnie na jakość modelu.
 
-2. **Czy mogą jednak pojawić się problemy związane ze złą parametryzacją i czy te problemy kompletnie uniemożliwiają zbieżność/dobrą jakość wyniku, czy tylko przedłużają uczenie?**
+#### Wpływ paczkowania
 
-Problemy związane ze złą parametryzacją jak najbardziej mogą wystąpić i mogą mieć wpływ zarówno na jakość wyniku jak i na szybkość jego trenowania.
+![part2_batches_loss](plots/part2_batches_loss.png)
 
-Dla małych wartości współczynnika alpha zaobserwowano, iż wytrenowany model charakteryzuje duża niepewność (loss), co jest skutkiem tego, że w zaprezentowanym wyżej (na wykresach) przypadku model był trenowany na 1000 epok, co nie było wystarczające. Rozwiązaniem tego problemu mogłoby być zwiększenie liczby epok, co z kolei wiązałoby się z wydłużonym czasem tenowania modelu.
+Model najszybciej uczy się na pojedyńczych przykładach niż na paczkach. Natomiast może to doprowadzić do overfittingu modelu.
 
-Dla dużych wartości współczynnika alpha natomiast dokonano obserwacji sugerującej, że model bardzo szybko znalazł się blisko optimum, ale nie mógł nigdy do niego dotrzeć, ponieważ zawsze je 'przeskakiwał'. Przez to taki model może nigdy nie znaleźć równie odpowiednich parametrów co model o mniejszym współczynniku alpha.
+#### Wpływ rozkładu początkowego
 
-Z kolei jeżeli chodzi o początkowe wartości parametrów W, to szczególną różnicę robią one w pierwszych epokach uczenia, natomiast wraz z kolejnymi epokami kolejne wartości parametrów modelu zbiegają się do siebie.
+![part2_init_loss](plots/part2_init_loss.png)
 
-Podsumowując, trenując model, najlepiej wybrać taki współczynnik alpha, który zapewnia kompromis pomiędzy szybkością zbieżności a stabilnością optymalizacji (w naszym przypadku alpha = 0.1 lub 0.01).
+Najlpeszy okazał się być rozkład He.
+
+#### Wpływ optymalizacji przez prosty gradient vs. ADAM
+
+![part2_optimizer_loss](plots/part2_optimizer_loss.png)
+
+Optymalizator ADAM pozwolił algorytmowi na uniknięcię tzw. punktów siodłowych, przez co poradził sobie zdecydowanie lepiej od SGD.
 
 ---
 
