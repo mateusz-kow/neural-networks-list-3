@@ -104,37 +104,37 @@ class ReLU:
 
 #### Wpływ wymiarowości warstwy ukrytej
 
-![part1_layers_loss](plots/part1_layers_loss.png)
+![](plots/part1_layers_loss.png)
 
-Im większa wyiarowość warstwy ukryte, tym model radzi sobie lepiej.
+W pierwszych epokach najlepiej radzą sobię modele z małą ilością wymiarów warstwy ukrytej. Natoamist przy większej ilości epok przewagę zyskują modele z większą wymiarowością warstwy ukrytej.
 
 #### Wpływ normalizacji danych
 
-![part1_normalization_loss](plots/part1_normalization_loss.png)
+![](plots/part1_normalization_loss.png)
 
-Model ma lepsze wyniki na danych znormalizowanych po większej ilości epok.
+Dla danych nieznormalizowanych model ma na początku bardzo duży loss, który jednak szybko maleje i nawet jest lepszy niż dla danych znormalizowanych. Natomaist w długim terminie model trenowany na danych znormalizowanych okazuje się być lepszy.
 
 #### Wpływ głębokości sieci (liczba warstw ukrytych)
 
-![part1_hidden_size_loss](plots/part1_hidden_size_loss.png)
+![](plots/part1_hidden_size_loss.png)
 
 Zwiększenie liczby warst ukrytych wpływa pozytwnie na jakość modelu.
 
 #### Wpływ paczkowania
 
-![part2_batches_loss](plots/part2_batches_loss.png)
+![](plots/part2_batches_loss.png)
 
-Model najszybciej uczy się na pojedyńczych przykładach niż na paczkach. Natomiast może to doprowadzić do overfittingu modelu.
+Model szybciej uczy się na pojedyńczych przykładach niż na paczkach.
 
 #### Wpływ rozkładu początkowego
 
-![part2_init_loss](plots/part2_init_loss.png)
+![](plots/part2_init_loss.png)
 
-Najlpeszy okazał się być rozkład He.
+Najlpeszy okazał się być rozkład He. Duże odchylenie prowadzi do widocznie słabych wyników.
 
 #### Wpływ optymalizacji przez prosty gradient vs. ADAM
 
-![part2_optimizer_loss](plots/part2_optimizer_loss.png)
+![](plots/part2_optimizer_loss.png)
 
 Optymalizator ADAM pozwolił algorytmowi na uniknięcię tzw. punktów siodłowych, przez co poradził sobie zdecydowanie lepiej od SGD.
 
