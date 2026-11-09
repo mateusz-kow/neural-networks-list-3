@@ -13,6 +13,7 @@ dependencies = [
     "pandas~=3.0.6",
     "scikit-learn~=1.9.1",
     "matplotlib>=3.11.2",
+    "weasyprint>=70.0",
 ]
 
 [project.scripts]

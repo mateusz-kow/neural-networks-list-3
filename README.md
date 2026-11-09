@@ -26,10 +26,5 @@ uv run main
 ### Generate the PDF report
 
 ```bash
-pandoc REPORT.md \
-  -o SN_L3_Kowalski_Mateusz.pdf \
-  --pdf-engine=xelatex \
-  -V geometry:margin=2.5cm \
-  -V fontsize=11pt \
-  -V lang=pl-PL
+uv run pandoc REPORT.md -o SN_L3_Kowalski_Mateusz.pdf --pdf-engine=weasyprint -V geometry:margin=2.5cm -V fontsize=11pt -V lang=pl-PL
 ```
