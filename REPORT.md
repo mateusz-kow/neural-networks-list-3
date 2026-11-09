@@ -106,11 +106,21 @@ class ReLU:
 
 ![](plots/part1_layers_loss.png)
 
+Hidden size: Mała (4)                  | Loss: 0.4914 | Acc: 0.869 | Prec: 0.833 | Rec: 0.893 | F1: 0.862
+
+Hidden size: Równa cechom (25)         | Loss: 0.4389 | Acc: 0.885 | Prec: 0.889 | Rec: 0.857 | F1: 0.873
+
+Hidden size: Duża (128)                | Loss: 0.3681 | Acc: 0.869 | Prec: 0.833 | Rec: 0.893 | F1: 0.862
+
 W pierwszych epokach najlepiej radzą sobię modele z małą ilością wymiarów warstwy ukrytej. Natoamist przy większej ilości epok przewagę zyskują modele z większą wymiarowością warstwy ukrytej.
 
 #### Wpływ normalizacji danych
 
 ![](plots/part1_normalization_loss.png)
+
+Dane: Znormalizowane       | Loss: 0.4982 | Acc: 0.885 | Prec: 0.862 | Rec: 0.893 | F1: 0.877
+
+Dane: Nieznormalizowane    | Loss: 0.6295 | Acc: 0.738 | Prec: 0.700 | Rec: 0.750 | F1: 0.724
 
 Dla danych nieznormalizowanych model ma na początku bardzo duży loss, który jednak szybko maleje i nawet jest lepszy niż dla danych znormalizowanych. Natomaist w długim terminie model trenowany na danych znormalizowanych okazuje się być lepszy.
 
@@ -118,11 +128,23 @@ Dla danych nieznormalizowanych model ma na początku bardzo duży loss, który j
 
 ![](plots/part1_hidden_size_loss.png)
 
+Arch: 1 warstwa ukryta [16]        | Loss: 0.4982 | Acc: 0.885 | Prec: 0.862 | Rec: 0.893 | F1: 0.877
+
+Arch: 2 warstwy ukryte [16, 16]    | Loss: 0.4874 | Acc: 0.787 | Prec: 0.778 | Rec: 0.750 | F1: 0.764
+
+Arch: 3 warstwy ukryte [16, 16, 16] | Loss: 0.3938 | Acc: 0.820 | Prec: 0.743 | Rec: 0.929 | F1: 0.825
+
 Zwiększenie liczby warst ukrytych wpływa pozytwnie na jakość modelu.
 
 #### Wpływ paczkowania
 
 ![](plots/part2_batches_loss.png)
+
+Tryb: Pełny zbiór (Batch GD)           | Loss: 0.5970 | Acc: 0.656 | Prec: 0.630 | Rec: 0.607 | F1: 0.618
+
+Tryb: Pojedyncze przykłady (SGD, b=1)  | Loss: 0.0025 | Acc: 0.852 | Prec: 0.806 | Rec: 0.893 | F1: 0.847
+
+Tryb: Paczki (Mini-batch, b=32)        | Loss: 0.3225 | Acc: 0.885 | Prec: 0.839 | Rec: 0.929 | F1: 0.881
 
 Model szybciej uczy się na pojedyńczych przykładach niż na paczkach.
 
@@ -130,11 +152,21 @@ Model szybciej uczy się na pojedyńczych przykładach niż na paczkach.
 
 ![](plots/part2_init_loss.png)
 
+Init: Inicjalizacja He (optymalna)        | Loss: 0.3225 | Acc: 0.885 | Prec: 0.839 | Rec: 0.929 | F1: 0.881
+
+Init: Odchylenie standardowe = 1.0        | Loss: 0.2579 | Acc: 0.787 | Prec: 0.742 | Rec: 0.821 | F1: 0.780
+
+Init: Zepsuta (duże odchylenie std=5.0)   | Loss: 0.0164 | Acc: 0.754 | Prec: 0.710 | Rec: 0.786 | F1: 0.746
+
 Najlpeszy okazał się być rozkład He. Duże odchylenie prowadzi do widocznie słabych wyników.
 
 #### Wpływ optymalizacji przez prosty gradient vs. ADAM
 
 ![](plots/part2_optimizer_loss.png)
+
+Optymalizator: Prosty SGD (alpha=0.01)             | Loss: 0.3225 | Acc: 0.885 | Prec: 0.839 | Rec: 0.929 | F1: 0.881
+
+Optymalizator: Optymalizator ADAM (alpha=0.01)     | Loss: 0.0004 | Acc: 0.852 | Prec: 0.788 | Rec: 0.929 | F1: 0.852
 
 Optymalizator ADAM pozwolił algorytmowi na uniknięcię tzw. punktów siodłowych, przez co poradził sobie zdecydowanie lepiej od SGD.
 
