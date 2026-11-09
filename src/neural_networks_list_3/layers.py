@@ -13,7 +13,6 @@ class Linear:
     ):
         rng = np.random.default_rng(random_state)
 
-        # Wybór metody inicjalizacji wag (Część 1 & Część 2)
         if init_method == "he":
             scale = np.sqrt(2.0 / in_features)
         elif init_method == "normal_001":
@@ -32,23 +31,19 @@ class Linear:
         self.dW: np.ndarray | None = None
         self.db: np.ndarray | None = None
 
-        # Statystyki dla optymalizatora ADAM
         self.m_W = np.zeros_like(self.W)
         self.v_W = np.zeros_like(self.W)
         self.m_b = np.zeros_like(self.b)
         self.v_b = np.zeros_like(self.b)
-        self.t = 0  # Licznik kroków dla korekcji biasu
+        self.t = 0
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         self.cache_x = x
         return np.dot(x, self.W) + self.b
 
     def backward(self, grad_output: np.ndarray) -> np.ndarray:
-        # dL/dW = X^T * dL/dY
         self.dW = np.dot(self.cache_x.T, grad_output)
-        # dL/db = sum(dL/dY)
         self.db = np.sum(grad_output, axis=0, keepdims=True)
-        # dL/dX = dL/dY * W^T
         grad_input = np.dot(grad_output, self.W.T)
         return grad_input
 
@@ -66,17 +61,15 @@ class Linear:
 
         elif optimizer == "adam":
             self.t += 1
-            # Aktualizacja momentów dla wag W
+
             self.m_W = beta1 * self.m_W + (1.0 - beta1) * self.dW
             self.v_W = beta2 * self.v_W + (1.0 - beta2) * (self.dW**2)
 
-            # Korekcja biasu w m i v
             m_W_corrected = self.m_W / (1.0 - beta1**self.t)
             v_W_corrected = self.v_W / (1.0 - beta2**self.t)
 
             self.W -= alpha * m_W_corrected / (np.sqrt(v_W_corrected) + eps)
 
-            # Aktualizacja momentów dla biasów b
             self.m_b = beta1 * self.m_b + (1.0 - beta1) * self.db
             self.v_b = beta2 * self.v_b + (1.0 - beta2) * (self.db**2)
 

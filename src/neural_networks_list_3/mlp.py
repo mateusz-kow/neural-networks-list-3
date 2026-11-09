@@ -80,7 +80,6 @@ class MLP:
             X_shuffled = X[indices]
             y_shuffled = y_col[indices]
 
-            # Wyznaczanie paczek (Full Batch, SGD, Mini-batch)
             if self.batch_size is None:
                 batches = [(X_shuffled, y_shuffled)]
             else:
@@ -95,25 +94,21 @@ class MLP:
             for X_batch, y_batch in batches:
                 b_size = X_batch.shape[0]
 
-                # Przejście w przód (Forward pass)
                 out = X_batch
                 for layer in self.layers:
                     out = layer.forward(out)
 
                 p = sigmoid(out)
 
-                # Przejście wstecz (Backward pass)
                 grad_output = (p - y_batch) / b_size
                 curr_grad = grad_output
                 for layer in reversed(self.layers):
                     curr_grad = layer.backward(curr_grad)
 
-                # Aktualizacja wag i biasów
                 for layer in self.layers:
                     if isinstance(layer, Linear):
                         layer.update(self.alpha, optimizer=self.optimizer)
 
-            # Rejestracja metryk po epoce na całym zbiorze
             full_out = X
             for layer in self.layers:
                 full_out = layer.forward(full_out)

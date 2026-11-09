@@ -1,7 +1,6 @@
 import os
 
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
-
 from .data import prepare_data
 from .mlp import MLP
 from .utils import plot_learning_curves
@@ -35,7 +34,7 @@ def main() -> None:
             epochs=300,
             batch_size=None,
             optimizer="sgd",
-            init_method="normal_001",
+            # init_method="normal_001",
         )
         model.fit(X_train_norm, y_train)
         results_hidden[label] = model.history
@@ -75,7 +74,7 @@ def main() -> None:
             epochs=300,
             batch_size=None,
             optimizer="sgd",
-            init_method="normal_001",
+            # init_method="normal_001",
         )
         model.fit(X_tr, y_train)
         results_norm[label] = model.history
@@ -114,7 +113,7 @@ def main() -> None:
             epochs=300,
             batch_size=None,
             optimizer="sgd",
-            init_method="normal_001",
+            # init_method="normal_001",
         )
         model.fit(X_train_norm, y_train)
         results_layers[label] = model.history
