@@ -6,6 +6,8 @@ from .mlp import MLP
 from .utils import plot_learning_curves
 
 
+EPOCHS = 3000
+
 def main() -> None:
     os.makedirs("plots", exist_ok=True)
     X_train_norm, X_test_norm, y_train, y_test = prepare_data(normalize=True)
@@ -31,10 +33,10 @@ def main() -> None:
         model = MLP(
             layer_dims=[n_features, h_size, 1],
             alpha=0.01,
-            epochs=300,
+            epochs=EPOCHS,
             batch_size=None,
             optimizer="sgd",
-            # init_method="normal_001",
+            init_method="normal_001",
         )
         model.fit(X_train_norm, y_train)
         results_hidden[label] = model.history
@@ -71,10 +73,10 @@ def main() -> None:
         model = MLP(
             layer_dims=[n_features, 16, 1],
             alpha=0.01,
-            epochs=300,
+            epochs=EPOCHS,
             batch_size=None,
             optimizer="sgd",
-            # init_method="normal_001",
+            init_method="normal_001",
         )
         model.fit(X_tr, y_train)
         results_norm[label] = model.history
@@ -110,10 +112,10 @@ def main() -> None:
         model = MLP(
             layer_dims=arch,
             alpha=0.01,
-            epochs=300,
+            epochs=EPOCHS,
             batch_size=None,
             optimizer="sgd",
-            # init_method="normal_001",
+            init_method="normal_001",
         )
         model.fit(X_train_norm, y_train)
         results_layers[label] = model.history

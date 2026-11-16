@@ -106,11 +106,11 @@ class ReLU:
 
 ![](plots/part1_layers_loss.png)
 
-Arch: 1 warstwa ukryta [16]        | Loss: 0.4982 | Acc: 0.885 | Prec: 0.862 | Rec: 0.893 | F1: 0.877
+Arch: 1 warstwa ukryta [16]        | Loss: 0.6900 | Acc: 0.541 | Prec: 0.000 | Rec: 0.000 | F1: 0.000
 
-Arch: 2 warstwy ukryte [16, 16]    | Loss: 0.4874 | Acc: 0.787 | Prec: 0.778 | Rec: 0.750 | F1: 0.764
+Arch: 2 warstwy ukryte [16, 16]    | Loss: 0.6905 | Acc: 0.541 | Prec: 0.000 | Rec: 0.000 | F1: 0.000
 
-Arch: 3 warstwy ukryte [16, 16, 16] | Loss: 0.3938 | Acc: 0.820 | Prec: 0.743 | Rec: 0.929 | F1: 0.825
+Arch: 3 warstwy ukryte [16, 16, 16] | Loss: 0.6905 | Acc: 0.541 | Prec: 0.000 | Rec: 0.000 | F1: 0.000
 
 W pierwszych epokach najlepiej radzą sobię modele z małą ilością wymiarów warstwy ukrytej. Natoamist przy większej ilości epok przewagę zyskują modele z większą wymiarowością warstwy ukrytej.
 
@@ -118,9 +118,9 @@ W pierwszych epokach najlepiej radzą sobię modele z małą ilością wymiarów
 
 ![](plots/part1_normalization_loss.png)
 
-Dane: Znormalizowane       | Loss: 0.4982 | Acc: 0.885 | Prec: 0.862 | Rec: 0.893 | F1: 0.877
+Dane: Znormalizowane       | Loss: 0.6900 | Acc: 0.541 | Prec: 0.000 | Rec: 0.000 | F1: 0.000
 
-Dane: Nieznormalizowane    | Loss: 0.6295 | Acc: 0.738 | Prec: 0.700 | Rec: 0.750 | F1: 0.724
+Dane: Nieznormalizowane    | Loss: 0.5983 | Acc: 0.689 | Prec: 0.636 | Rec: 0.750 | F1: 0.689
 
 Dla danych nieznormalizowanych model ma na początku bardzo duży loss, który jednak szybko maleje i nawet jest lepszy niż dla danych znormalizowanych. Natomaist w długim terminie model trenowany na danych znormalizowanych okazuje się być lepszy.
 
@@ -128,11 +128,11 @@ Dla danych nieznormalizowanych model ma na początku bardzo duży loss, który j
 
 ![](plots/part1_hidden_size_loss.png)
 
-Hidden size: Mała (4)                  | Loss: 0.4914 | Acc: 0.869 | Prec: 0.833 | Rec: 0.893 | F1: 0.862
+Hidden size: Mała (4)                  | Loss: 0.6897 | Acc: 0.541 | Prec: 0.000 | Rec: 0.000 | F1: 0.000
 
-Hidden size: Równa cechom (25)         | Loss: 0.4389 | Acc: 0.885 | Prec: 0.889 | Rec: 0.857 | F1: 0.873
+Hidden size: Równa cechom (25)         | Loss: 0.6883 | Acc: 0.541 | Prec: 0.000 | Rec: 0.000 | F1: 0.000
 
-Hidden size: Duża (128)                | Loss: 0.3681 | Acc: 0.869 | Prec: 0.833 | Rec: 0.893 | F1: 0.862
+Hidden size: Duża (128)                | Loss: 0.6782 | Acc: 0.541 | Prec: 0.000 | Rec: 0.000 | F1: 0.000
 
 Zwiększenie liczby warst ukrytych wpływa pozytwnie na jakość modelu.
 
