@@ -55,19 +55,38 @@ class MLP:
 
         self.history = {
             "loss": [],
+            "test_loss": [],
             "accuracy": [],
             "f1": [],
             "precision": [],
             "recall": [],
         }
 
-    def fit(self, X: np.ndarray, y: np.ndarray) -> MLP:
+    def fit(
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        X_eval: np.ndarray | None = None,
+        y_eval: np.ndarray | None = None,
+    ) -> "MLP":
+        """
+        Trenuje model na X/y.
+
+        Jeśli podano X_eval i y_eval, po każdej epoce oblicza również loss
+        na tym zbiorze. Dane ewaluacyjne nie uczestniczą w propagacji wstecznej
+        ani aktualizacji wag.
+        """
+        if (X_eval is None) != (y_eval is None):
+            raise ValueError("X_eval i y_eval muszą być przekazane razem.")
+
         n_samples = X.shape[0]
         y_col = y.reshape(-1, 1)
+        y_eval_col = y_eval.reshape(-1, 1) if y_eval is not None else None
         rng = np.random.default_rng(42)
 
         self.history = {
             "loss": [],
+            "test_loss": [],
             "accuracy": [],
             "f1": [],
             "precision": [],
@@ -109,19 +128,26 @@ class MLP:
                     if isinstance(layer, Linear):
                         layer.update(self.alpha, optimizer=self.optimizer)
 
+            # Loss i metryki na zbiorze treningowym.
             full_out = X
             for layer in self.layers:
                 full_out = layer.forward(full_out)
             full_p = sigmoid(full_out)
 
-            loss = compute_loss(y_col, full_p)
+            train_loss = compute_loss(y_col, full_p)
             y_pred = (full_p >= 0.5).astype(int)
 
-            self.history["loss"].append(loss)
+            self.history["loss"].append(train_loss)
             self.history["accuracy"].append(accuracy_score(y, y_pred))
             self.history["f1"].append(f1_score(y, y_pred, zero_division=0))
             self.history["precision"].append(precision_score(y, y_pred, zero_division=0))
             self.history["recall"].append(recall_score(y, y_pred, zero_division=0))
+
+            # Ewaluacja na zbiorze testowym: bez backpropagation i aktualizacji wag.
+            if X_eval is not None and y_eval_col is not None:
+                eval_proba = self.predict_proba(X_eval)
+                eval_loss = compute_loss(y_eval_col, eval_proba)
+                self.history["test_loss"].append(eval_loss)
 
         return self
 

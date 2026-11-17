@@ -1,12 +1,15 @@
 import os
 
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+
 from .data import prepare_data
 from .mlp import MLP
 from .utils import plot_learning_curves
 
 
-EPOCHS = 3000
+EPOCHS = 1000
+EPOCHS_PART2 = 100
+
 
 def main() -> None:
     os.makedirs("plots", exist_ok=True)
@@ -38,12 +41,12 @@ def main() -> None:
             optimizer="sgd",
             init_method="normal_001",
         )
-        model.fit(X_train_norm, y_train)
+        model.fit(X_train_norm, y_train, X_eval=X_test_norm, y_eval=y_test)
         results_hidden[label] = model.history
 
         y_pred = model.predict(X_test_norm)
         print(
-            f"Hidden size: {label:25s} | Loss: {model.history['loss'][-1]:.4f} | "
+            f"Hidden size: {label:25s} | Test Loss: {model.history['test_loss'][-1]:.4f} | "
             f"Acc: {accuracy_score(y_test, y_pred):.3f} | Prec: {precision_score(y_test, y_pred, zero_division=0):.3f} | "
             f"Rec: {recall_score(y_test, y_pred, zero_division=0):.3f} | F1: {f1_score(y_test, y_pred, zero_division=0):.3f}"
         )
@@ -78,12 +81,12 @@ def main() -> None:
             optimizer="sgd",
             init_method="normal_001",
         )
-        model.fit(X_tr, y_train)
+        model.fit(X_tr, y_train, X_eval=X_te, y_eval=y_test)
         results_norm[label] = model.history
 
         y_pred = model.predict(X_te)
         print(
-            f"Dane: {label:20s} | Loss: {model.history['loss'][-1]:.4f} | "
+            f"Dane: {label:20s} | Test Loss: {model.history['test_loss'][-1]:.4f} | "
             f"Acc: {accuracy_score(y_test, y_pred):.3f} | Prec: {precision_score(y_test, y_pred, zero_division=0):.3f} | "
             f"Rec: {recall_score(y_test, y_pred, zero_division=0):.3f} | F1: {f1_score(y_test, y_pred, zero_division=0):.3f}"
         )
@@ -95,7 +98,7 @@ def main() -> None:
     )
 
     # =========================================================================
-    # CZĘŚĆ 1 - EKSPERYMENT 3: Różna liczba warstw (Głębokość sieci)
+    # CZĘŚĆ 1 - EKSPERYMENT 3: Różna liczba warstw (głębokość sieci)
     # =========================================================================
     print("\n" + "=" * 80)
     print(" CZĘŚĆ 1 - EKSPERYMENT 3: Różna liczba warstw (głębokość sieci)")
@@ -117,12 +120,12 @@ def main() -> None:
             optimizer="sgd",
             init_method="normal_001",
         )
-        model.fit(X_train_norm, y_train)
+        model.fit(X_train_norm, y_train, X_eval=X_test_norm, y_eval=y_test)
         results_layers[label] = model.history
 
         y_pred = model.predict(X_test_norm)
         print(
-            f"Arch: {label:28s} | Loss: {model.history['loss'][-1]:.4f} | "
+            f"Arch: {label:28s} | Test Loss: {model.history['test_loss'][-1]:.4f} | "
             f"Acc: {accuracy_score(y_test, y_pred):.3f} | Prec: {precision_score(y_test, y_pred, zero_division=0):.3f} | "
             f"Rec: {recall_score(y_test, y_pred, zero_division=0):.3f} | F1: {f1_score(y_test, y_pred, zero_division=0):.3f}"
         )
@@ -134,7 +137,7 @@ def main() -> None:
     )
 
     # =========================================================================
-    # CZĘŚĆ 2 - EKSPERYMENT 1: Tryby paczkowania danych (Full vs SGD vs Mini-batch)
+    # CZĘŚĆ 2 - EKSPERYMENT 1: Tryby paczkowania danych
     # =========================================================================
     print("\n" + "=" * 80)
     print(" CZĘŚĆ 2 - EKSPERYMENT 1: Tryby paczkowania danych")
@@ -152,17 +155,17 @@ def main() -> None:
         model = MLP(
             layer_dims=deep_architecture,
             alpha=0.01,
-            epochs=150,
+            epochs=EPOCHS_PART2,
             batch_size=b_size,
             optimizer="sgd",
             init_method="he",
         )
-        model.fit(X_train_norm, y_train)
+        model.fit(X_train_norm, y_train, X_eval=X_test_norm, y_eval=y_test)
         results_batches[label] = model.history
 
         y_pred = model.predict(X_test_norm)
         print(
-            f"Tryb: {label:32s} | Loss: {model.history['loss'][-1]:.4f} | "
+            f"Tryb: {label:32s} | Test Loss: {model.history['test_loss'][-1]:.4f} | "
             f"Acc: {accuracy_score(y_test, y_pred):.3f} | Prec: {precision_score(y_test, y_pred, zero_division=0):.3f} | "
             f"Rec: {recall_score(y_test, y_pred, zero_division=0):.3f} | F1: {f1_score(y_test, y_pred, zero_division=0):.3f}"
         )
@@ -174,7 +177,7 @@ def main() -> None:
     )
 
     # =========================================================================
-    # CZĘŚĆ 2 - EKSPERYMENT 2: Inicjalizacja wag (Std=1 vs He vs Zepsuta)
+    # CZĘŚĆ 2 - EKSPERYMENT 2: Metody inicjalizacji wag
     # =========================================================================
     print("\n" + "=" * 80)
     print(" CZĘŚĆ 2 - EKSPERYMENT 2: Metody inicjalizacji wag")
@@ -191,17 +194,17 @@ def main() -> None:
         model = MLP(
             layer_dims=deep_architecture,
             alpha=0.01,
-            epochs=150,
+            epochs=EPOCHS_PART2,
             batch_size=32,
             optimizer="sgd",
             init_method=init_m,
         )
-        model.fit(X_train_norm, y_train)
+        model.fit(X_train_norm, y_train, X_eval=X_test_norm, y_eval=y_test)
         results_init[label] = model.history
 
         y_pred = model.predict(X_test_norm)
         print(
-            f"Init: {label:35s} | Loss: {model.history['loss'][-1]:.4f} | "
+            f"Init: {label:35s} | Test Loss: {model.history['test_loss'][-1]:.4f} | "
             f"Acc: {accuracy_score(y_test, y_pred):.3f} | Prec: {precision_score(y_test, y_pred, zero_division=0):.3f} | "
             f"Rec: {recall_score(y_test, y_pred, zero_division=0):.3f} | F1: {f1_score(y_test, y_pred, zero_division=0):.3f}"
         )
@@ -216,7 +219,7 @@ def main() -> None:
     # CZĘŚĆ 2 - EKSPERYMENT 3: Prosty SGD vs Optymalizator ADAM
     # =========================================================================
     print("\n" + "=" * 80)
-    print(" CZĘŚĆ 2 - EKSPERYMENT 3: Optymalizacja przez prosty gradient vs ADAM")
+    print(" CZĘŚĆ 2 - EKSPERYMENT 3: Optymalizatory SGD oraz ADAM")
     print("=" * 80)
 
     optimizer_variants = {
@@ -229,17 +232,17 @@ def main() -> None:
         model = MLP(
             layer_dims=deep_architecture,
             alpha=0.01,
-            epochs=150,
+            epochs=EPOCHS_PART2,
             batch_size=32,
             optimizer=opt,
             init_method="he",
         )
-        model.fit(X_train_norm, y_train)
+        model.fit(X_train_norm, y_train, X_eval=X_test_norm, y_eval=y_test)
         results_optimizers[label] = model.history
 
         y_pred = model.predict(X_test_norm)
         print(
-            f"Optymalizator: {label:35s} | Loss: {model.history['loss'][-1]:.4f} | "
+            f"Optymalizator: {label:35s} | Test Loss: {model.history['test_loss'][-1]:.4f} | "
             f"Acc: {accuracy_score(y_test, y_pred):.3f} | Prec: {precision_score(y_test, y_pred, zero_division=0):.3f} | "
             f"Rec: {recall_score(y_test, y_pred, zero_division=0):.3f} | F1: {f1_score(y_test, y_pred, zero_division=0):.3f}"
         )
